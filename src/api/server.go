@@ -81,11 +81,19 @@ func checkParameters(data map[string]string, keys ...string) error {
     return nil
 }
 
-func RunServer(db Database, addr string) {
+func createMux(db Database) *http.ServeMux {
     mux := http.NewServeMux()
     mux.Handle("/", http.HandlerFunc(notFound))
     mux.Handle("/list", http.HandlerFunc(db.list))
     mux.Handle("/price", http.HandlerFunc(db.price))
     mux.Handle("/update", http.HandlerFunc(db.update))
-    log.Fatal(http.ListenAndServe(addr, mux))
+    return mux
+}
+
+func RunServer(db Database, conf ConnectionConfig) {
+    log.Fatal(http.ListenAndServe(conf.Addr(), createMux(db)))
+}
+
+func CreateServer(db Database, conf ConnectionConfig) *http.Server {
+    return &http.Server{Addr:conf.Addr(), Handler:createMux(db)}
 }
