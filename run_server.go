@@ -1,15 +1,15 @@
 package main
 
 import (
-    "./src/server"
+    "./src/api"
     "flag"
     "fmt"
 )
 
 func main() {
     url := getURL()
-    db := server.Database{"socks": 5, "shoes": 50}
-    server.RunServer(db, url)
+    db := api.Database{"socks": 5, "shoes": 50}
+    api.RunServer(db, url)
 }
 
 func getURL() string {

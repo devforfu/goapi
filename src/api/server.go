@@ -1,4 +1,4 @@
-package server
+package api
 
 import (
     "encoding/json"
@@ -12,47 +12,6 @@ import (
 type Dollars float64
 type Database map[string]Dollars
 type Response map[string]interface{}
-
-type Responder struct {
-    http.ResponseWriter
-    *json.Encoder
-}
-
-func (r Responder) SendError(message string) {
-    r.WriteHeader(http.StatusBadRequest)
-    r.Encode(Response{"error": message})
-}
-
-func (r Responder) SendDatabase(db Database) {
-    r.WriteHeader(http.StatusAccepted)
-    r.Encode(db)
-}
-
-func (r Responder) SendPrice(item string, price Dollars) {
-    r.WriteHeader(http.StatusAccepted)
-    r.Encode(Response{"item": item, "price": price})
-}
-
-func (r Responder) SendSuccess(resp Response) {
-    r.WriteHeader(http.StatusAccepted)
-    r.Encode(resp)
-}
-
-func NewJSONResponse(w http.ResponseWriter) Responder {
-    resp := Responder{}
-    resp.ResponseWriter = w
-    resp.Encoder = json.NewEncoder(w)
-    return resp
-}
-
-func RunServer(db Database, addr string) {
-    mux := http.NewServeMux()
-    mux.Handle("/", http.HandlerFunc(notFound))
-    mux.Handle("/list", http.HandlerFunc(db.list))
-    mux.Handle("/price", http.HandlerFunc(db.price))
-    mux.Handle("/update", http.HandlerFunc(db.update))
-    log.Fatal(http.ListenAndServe(addr, mux))
-}
 
 func notFound(w http.ResponseWriter, req *http.Request) {
     logMessage(req,"not found page request")
@@ -122,6 +81,11 @@ func checkParameters(data map[string]string, keys ...string) error {
     return nil
 }
 
-
-
-
+func RunServer(db Database, addr string) {
+    mux := http.NewServeMux()
+    mux.Handle("/", http.HandlerFunc(notFound))
+    mux.Handle("/list", http.HandlerFunc(db.list))
+    mux.Handle("/price", http.HandlerFunc(db.price))
+    mux.Handle("/update", http.HandlerFunc(db.update))
+    log.Fatal(http.ListenAndServe(addr, mux))
+}
